@@ -7,6 +7,7 @@ using System.Web;
 using System.Web.Mvc;
 using FI.AtividadeEntrevista.DML;
 using System.Net;
+using System.Text.RegularExpressions;
 
 namespace WebAtividadeEntrevista.Controllers
 {
@@ -40,6 +41,7 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
+                model.CPF = RemoverCaracteresEspeciais(model.CPF);
 
                 if (!CpfValido(model.CPF))
                 {
@@ -50,11 +52,9 @@ namespace WebAtividadeEntrevista.Controllers
                     return Json(string.Join(Environment.NewLine, erros));
                 }
 
-                var cliente = bo.PesquisaPorCpf(model.CPF);
-
-                if(cliente != null)
+                if(bo.VerificarExistencia(model.CPF))
                 {
-                    var erros = new List<string>() { "CPF já cadastrado no banco de dados" };
+                    var erros = new List<string>() { "o CPF informado já consta no banco de dados" };
 
                     Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
@@ -71,7 +71,8 @@ namespace WebAtividadeEntrevista.Controllers
                     Nacionalidade = model.Nacionalidade,
                     Nome = model.Nome,
                     Sobrenome = model.Sobrenome,
-                    Telefone = model.Telefone
+                    Telefone = model.Telefone,
+                    CPF = model.CPF
                 });
 
            
@@ -171,9 +172,6 @@ namespace WebAtividadeEntrevista.Controllers
 
         private bool CpfValido(string cpf)
         {
-            // Remove qualquer máscara do CPF (pontos, hífens)
-            cpf = cpf.Trim().Replace(".", "").Replace("-", "");
-
             // Verifica se o CPF tem 11 dígitos
             if (cpf.Length != 11)
                 return false;
@@ -218,5 +216,7 @@ namespace WebAtividadeEntrevista.Controllers
             // Verifica se os dois dígitos verificadores estão corretos
             return cpf.EndsWith(digito);
         }
+
+        public static string RemoverCaracteresEspeciais(string cpf) => Regex.Replace(cpf, @"[^\d]", "");
     }
 }
