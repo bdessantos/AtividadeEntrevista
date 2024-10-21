@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using FI.AtividadeEntrevista.DML;
+using System.Net;
 
 namespace WebAtividadeEntrevista.Controllers
 {
@@ -39,7 +40,27 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
-                
+
+                if (!CpfValido(model.CPF))
+                {
+                    var erros = new List<string>() { "CPF inválido" };
+
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return Json(string.Join(Environment.NewLine, erros));
+                }
+
+                var cliente = bo.PesquisaPorCpf(model.CPF);
+
+                if(cliente != null)
+                {
+                    var erros = new List<string>() { "CPF já cadastrado no banco de dados" };
+
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return Json(string.Join(Environment.NewLine, erros));
+                }
+
                 model.Id = bo.Incluir(new Cliente()
                 {                    
                     CEP = model.CEP,
@@ -146,6 +167,56 @@ namespace WebAtividadeEntrevista.Controllers
             {
                 return Json(new { Result = "ERROR", Message = ex.Message });
             }
+        }
+
+        private bool CpfValido(string cpf)
+        {
+            // Remove qualquer máscara do CPF (pontos, hífens)
+            cpf = cpf.Trim().Replace(".", "").Replace("-", "");
+
+            // Verifica se o CPF tem 11 dígitos
+            if (cpf.Length != 11)
+                return false;
+
+            // Verifica se todos os dígitos são iguais, como "111.111.111-11", que é inválido
+            if (cpf.Distinct().Count() == 1)
+                return false;
+
+            // Calcula os primeiros 9 dígitos do CPF
+            int[] multiplicador1 = new int[9] { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+            int[] multiplicador2 = new int[10] { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+
+            string tempCpf = cpf.Substring(0, 9);
+            int soma = 0;
+
+            // Primeiro dígito verificador
+            for (int i = 0; i < 9; i++)
+                soma += int.Parse(tempCpf[i].ToString()) * multiplicador1[i];
+
+            int resto = soma % 11;
+            if (resto < 2)
+                resto = 0;
+            else
+                resto = 11 - resto;
+
+            string digito = resto.ToString();
+            tempCpf += digito;
+
+            // Segundo dígito verificador
+            soma = 0;
+            for (int i = 0; i < 10; i++)
+                soma += int.Parse(tempCpf[i].ToString()) * multiplicador2[i];
+
+            resto = soma % 11;
+            if (resto < 2)
+                resto = 0;
+            else
+                resto = 11 - resto;
+
+            digito += resto.ToString();
+
+            // Verifica se os dois dígitos verificadores estão corretos
+            return cpf.EndsWith(digito);
         }
     }
 }
