@@ -20,6 +20,13 @@ function IncluirBeneficiario() {
         "CPF": cpf
     }
 
+    const beneficiarioPesquisar = beneficiarios.find(item => item.CPF == cpf) || null;
+
+    if (beneficiarioPesquisar) {
+        ModalDialog("Beneficiario", "Ja existe um beneficiario com o CPF informado para este cliente")
+        return
+    }
+
     ValidarBeneficiario(beneficiario)
 }
 

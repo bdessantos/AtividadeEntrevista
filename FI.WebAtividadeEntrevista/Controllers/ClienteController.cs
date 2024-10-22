@@ -252,25 +252,6 @@ namespace WebAtividadeEntrevista.Controllers
                 return Json(string.Join(Environment.NewLine, new List<string> { "CPF invalido" }));
             }
 
-            if (beneficiario.Id < 1)
-            {
-                if (boBeneficiario.VerificarExistencia(beneficiario.CPF))
-                {
-                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
-
-                    return Json(string.Join(Environment.NewLine, new List<string> { "O CPF informado já consta no banco de dados" }));
-                }
-            }
-            else
-            {
-                if (boBeneficiario.VerificarExistenciaParaUmIdDiferente(beneficiario.CPF, beneficiario.Id))
-                {
-                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
-
-                    return Json(string.Join(Environment.NewLine, new List<string> { "O CPF informado já consta no banco de dados" }));
-                }
-            }
-
             return Json("CPF valido");
         }
 
@@ -326,50 +307,21 @@ namespace WebAtividadeEntrevista.Controllers
         private BeneficiarioModel CarregarBeneficiarioModel(Beneficiario beneficiario) =>
             new BeneficiarioModel()
             {
-                CPF = beneficiario.CPF,
+                CPF = FormartarCpf(beneficiario.CPF),
                 Nome = beneficiario.Nome,
                 Id = beneficiario.Id,
             };
+
+        private string FormartarCpf(string cpf) => Convert.ToUInt64(cpf).ToString(@"000\.000\.000\-00");
 
         private void IncluirBeneficiarios(List<BeneficiarioModel> beneficiarios, long idCliente)
         {
             var boBeneficiario = new BoBeneficiario();
 
-            var errosBeneficiarios = new List<string>();
-
             foreach (var beneficiario in beneficiarios)
             {
                 beneficiario.CPF = RemoverCaracteresEspeciais(beneficiario.CPF);
 
-                if (!CpfValido(beneficiario.CPF))
-                {
-                    errosBeneficiarios.Add(string.Format("CPF do beneficiario {0} e invalido", beneficiario.Nome));
-                    continue;
-                }
-
-                if(beneficiario.Id < 1)
-                {
-                    if (boBeneficiario.VerificarExistencia(beneficiario.CPF))
-                    {
-                        errosBeneficiarios.Add(string.Format("O CPF informado para o beneficiario {0} ja consta no banco de dados", beneficiario.Nome));
-                        continue;
-                    }
-                }
-                else
-                {
-                    if (boBeneficiario.VerificarExistenciaParaUmIdDiferente(beneficiario.CPF, beneficiario.Id))
-                    {
-                        errosBeneficiarios.Add(string.Format("O CPF informado para o beneficiario {0} ja consta no banco de dados", beneficiario.Nome));
-                        continue;
-                    }
-                }
-            }
-
-            if (errosBeneficiarios.Count > 0)
-                throw new BadRequestException(string.Join(";", errosBeneficiarios));
-
-            foreach (var beneficiario in beneficiarios)
-            {
                 if (beneficiario.Deletar)
                 {
                     boBeneficiario.Excluir(beneficiario.Id);
