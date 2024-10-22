@@ -14,35 +14,56 @@ function IncluirBeneficiario() {
         return
     }
 
-    CarregarBeneficiario(id, cpf, nome)
-
     var beneficiario = {
         "Id": id,
         "Nome": nome,
         "CPF": cpf
     }
 
-    if (id > 0) {
+    ValidarBeneficiario(beneficiario)
+}
 
-        const index = beneficiarios.findIndex(item => item.Id == id);
+function ValidarBeneficiario(beneficiario) {
 
-        beneficiarios.splice(index, 1);
+    $.ajax({
+        url: urlValidar,
+        method: "POST",
+        data: beneficiario,
+        error:
+            function (r) {
+                if (r.status == 400)
+                    ModalDialog("Ocorreu um erro", r.responseJSON);
+                else if (r.status == 500)
+                    ModalDialog("Ocorreu um erro", "Ocorreu um erro interno no servidor.");
+            },
+        success:
+            function (r) {
 
-        beneficiarios.push(beneficiario)
+                CarregarBeneficiario(beneficiario.Id, beneficiario.CPF, beneficiario.Nome)
 
-        var table = document.getElementById("beneficiarioTable");
+                if (beneficiario.Id > 0) {
 
-        table.innerHTML = ''
+                    const index = beneficiarios.findIndex(item => item.Id == beneficiario.Id);
 
-        CarregarBeneficiarios(beneficiarios)
-    }
-    else {
-        beneficiarios.push(beneficiario)
-    }
+                    beneficiarios.splice(index, 1);
 
-    document.getElementById('IdBeneficiario').value = 0
-    document.getElementById('CPFBeneficiario').value = ''
-    document.getElementById('NomeBeneficiario').value = ''
+                    beneficiarios.push(beneficiario)
+
+                    var table = document.getElementById("beneficiarioTable");
+
+                    table.innerHTML = ''
+
+                    CarregarBeneficiarios(beneficiarios)
+                }
+                else {
+                    beneficiarios.push(beneficiario)
+                }
+
+                document.getElementById('IdBeneficiario').value = 0
+                document.getElementById('CPFBeneficiario').value = ''
+                document.getElementById('NomeBeneficiario').value = ''
+            }
+    });
 }
 
 function CarregarBeneficiarios(beneficiariosCarregar) {
@@ -92,7 +113,7 @@ function CarregarDados(button) {
         const index = beneficiarios.findIndex(item => item.CPF == cpf);
         beneficiarios.splice(index, 1);
     }
-        
+
 }
 
 function DeletarBeneficiario(button) {

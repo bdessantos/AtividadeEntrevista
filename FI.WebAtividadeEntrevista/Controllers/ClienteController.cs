@@ -103,8 +103,6 @@ namespace WebAtividadeEntrevista.Controllers
             }
         }
 
-
-
         [HttpPost]
         public JsonResult Alterar(ClienteModel model)
         {
@@ -236,6 +234,44 @@ namespace WebAtividadeEntrevista.Controllers
             {
                 return Json(new { Result = "ERROR", Message = ex.Message });
             }
+        }
+
+        [HttpPost]
+        public JsonResult Validar(BeneficiarioModel beneficiario)
+        {
+            var boBeneficiario = new BoBeneficiario();
+
+            beneficiario.CPF = RemoverCaracteresEspeciais(beneficiario.CPF);
+
+            var errosBeneficiarios = new List<string>();
+
+            if (!CpfValido(beneficiario.CPF))
+            {
+                Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                return Json(string.Join(Environment.NewLine, new List<string> { "CPF invalido" }));
+            }
+
+            if (beneficiario.Id < 1)
+            {
+                if (boBeneficiario.VerificarExistencia(beneficiario.CPF))
+                {
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return Json(string.Join(Environment.NewLine, new List<string> { "O CPF informado já consta no banco de dados" }));
+                }
+            }
+            else
+            {
+                if (boBeneficiario.VerificarExistenciaParaUmIdDiferente(beneficiario.CPF, beneficiario.Id))
+                {
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return Json(string.Join(Environment.NewLine, new List<string> { "O CPF informado já consta no banco de dados" }));
+                }
+            }
+
+            return Json("CPF valido");
         }
 
         private bool CpfValido(string cpf)
