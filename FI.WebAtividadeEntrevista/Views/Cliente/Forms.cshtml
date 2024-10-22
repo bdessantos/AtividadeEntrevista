@@ -80,6 +80,11 @@
 
     <div class="row">
         <div class="col-lg-12">
+            <div class="pull-left">
+                <button type="button" class="btn btn-sm btn-primary pull-right" onclick="AbrirModalBenediciario()">Beneficiários</button>
+            </div>
+        </div>
+        <div class="col-lg-12">
             <div class="pull-right">
                 <button type="submit" class="btn btn-sm btn-success">Salvar</button>
                 @Html.ActionLink("Voltar", "Index", "Cliente", new { }, new { @class = "btn btn-sm btn-danger" })
@@ -87,5 +92,34 @@
         </div>
     </div>
 
-
 </form>
+
+<!-- Modal -->
+<div id="modalBeneficiario" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Beneficiários</h4>
+            </div>
+            <div class="modal-body">
+                <form id="beneficiarioForm">
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label for="CPFBeneficiario">CPF:</label>
+                            <input required="required" type="text" class="form-control" id="CPFBeneficiario" name="CPFBeneficiario" placeholder="Ex.: 010.011.111-00" maxlength="14">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="NomeBeneficiario">Nome:</label>
+                            <input required="required" type="text" class="form-control" id="NomeBeneficiario" name="NomeBeneficiario" placeholder="Ex.: Maria" maxlength="50">
+                        </div>
+                        <div class="col-md-4 col-lg-pull-3">
+                            <button type="submit" class="btn btn-sm btn-success">Incluir</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
