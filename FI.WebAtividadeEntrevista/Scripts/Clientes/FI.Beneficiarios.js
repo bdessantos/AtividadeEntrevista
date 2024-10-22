@@ -84,6 +84,15 @@ function CarregarDados(button) {
     document.getElementById('IdBeneficiario').value = id
     document.getElementById('CPFBeneficiario').value = cpf
     document.getElementById('NomeBeneficiario').value = nome
+
+    if (id < 1) {
+
+        row.parentNode.removeChild(row);
+
+        const index = beneficiarios.findIndex(item => item.CPF == cpf);
+        beneficiarios.splice(index, 1);
+    }
+        
 }
 
 function DeletarBeneficiario(button) {
