@@ -49,6 +49,10 @@ $(document).ready(function () {
     
 })
 
+$(document).ready(function () {
+    $('#CPF').mask('000.000.000-00');
+});
+
 function ModalDialog(titulo, texto) {
     var random = Math.random().toString().replace('.', '');
     var texto = '<div id="' + random + '" class="modal fade">                                                               ' +

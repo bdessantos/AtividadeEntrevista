@@ -1,4 +1,6 @@
 ﻿using FI.AtividadeEntrevista.DML;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -63,6 +65,23 @@ namespace FI.AtividadeEntrevista.DAL
             return ds.Tables[0].Rows.Count > 0;
         }
 
+
+        internal bool VerificarExistenciaParaUmIdDiferente(string CPF, long id)
+        {
+            List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
+
+            parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", CPF));
+
+            DataSet ds = base.Consultar("FI_SP_ConsClientePeloCpf", parametros);
+
+            if (ds == null || ds.Tables == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
+                return false;
+
+            var row = ds.Tables[0].Rows[0];
+
+            return row.Field<long>("Id") != id;
+        }
+
         internal List<Cliente> Pesquisa(int iniciarEm, int quantidade, string campoOrdenacao, bool crescente, out int qtd)
         {
             List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
@@ -118,6 +137,7 @@ namespace FI.AtividadeEntrevista.DAL
             parametros.Add(new System.Data.SqlClient.SqlParameter("Email", cliente.Email));
             parametros.Add(new System.Data.SqlClient.SqlParameter("Telefone", cliente.Telefone));
             parametros.Add(new System.Data.SqlClient.SqlParameter("ID", cliente.Id));
+            parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", cliente.CPF));
 
             base.Executar("FI_SP_AltCliente", parametros);
         }
@@ -154,6 +174,7 @@ namespace FI.AtividadeEntrevista.DAL
                     cli.Nome = row.Field<string>("Nome");
                     cli.Sobrenome = row.Field<string>("Sobrenome");
                     cli.Telefone = row.Field<string>("Telefone");
+                    cli.CPF = row.Field<string>("CPF");
                     lista.Add(cli);
                 }
             }

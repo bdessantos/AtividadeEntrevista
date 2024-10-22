@@ -54,7 +54,7 @@ namespace WebAtividadeEntrevista.Controllers
 
                 if(bo.VerificarExistencia(model.CPF))
                 {
-                    var erros = new List<string>() { "o CPF informado já consta no banco de dados" };
+                    var erros = new List<string>() { "O CPF informado já consta no banco de dados" };
 
                     Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
@@ -96,6 +96,26 @@ namespace WebAtividadeEntrevista.Controllers
             }
             else
             {
+                model.CPF = RemoverCaracteresEspeciais(model.CPF);
+
+                if (!CpfValido(model.CPF))
+                {
+                    var erros = new List<string>() { "CPF inválido" };
+
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return Json(string.Join(Environment.NewLine, erros));
+                }
+
+                if (bo.VerificarExistenciaParaUmIdDiferente(model.CPF, model.Id))
+                {
+                    var erros = new List<string>() { "O CPF informado já consta no banco de dados" };
+
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return Json(string.Join(Environment.NewLine, erros));
+                }
+
                 bo.Alterar(new Cliente()
                 {
                     Id = model.Id,
@@ -107,7 +127,8 @@ namespace WebAtividadeEntrevista.Controllers
                     Nacionalidade = model.Nacionalidade,
                     Nome = model.Nome,
                     Sobrenome = model.Sobrenome,
-                    Telefone = model.Telefone
+                    Telefone = model.Telefone,
+                    CPF = model.CPF
                 });
                                
                 return Json("Cadastro alterado com sucesso");
@@ -134,10 +155,9 @@ namespace WebAtividadeEntrevista.Controllers
                     Nacionalidade = cliente.Nacionalidade,
                     Nome = cliente.Nome,
                     Sobrenome = cliente.Sobrenome,
-                    Telefone = cliente.Telefone
+                    Telefone = cliente.Telefone,
+                    CPF = cliente.CPF
                 };
-
-            
             }
 
             return View(model);
