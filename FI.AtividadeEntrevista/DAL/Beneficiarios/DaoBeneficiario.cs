@@ -67,32 +67,5 @@ namespace FI.AtividadeEntrevista.DAL.Beneficiarios
 
             return lista;
         }
-
-        internal bool VerificarExistencia(string CPF)
-        {
-            List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
-
-            parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", CPF));
-
-            DataSet ds = base.Consultar("FI_SP_VerificaBeneficiario", parametros);
-
-            return ds.Tables[0].Rows.Count > 0;
-        }
-
-        internal bool VerificarExistenciaParaUmIdDiferente(string CPF, long id)
-        {
-            List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
-
-            parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", CPF));
-
-            DataSet ds = base.Consultar("FI_SP_ConsBeneficiarioPeloCpf", parametros);
-
-            if (ds == null || ds.Tables == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
-                return false;
-
-            var row = ds.Tables[0].Rows[0];
-
-            return row.Field<long>("Id") != id;
-        }
     }
 }
