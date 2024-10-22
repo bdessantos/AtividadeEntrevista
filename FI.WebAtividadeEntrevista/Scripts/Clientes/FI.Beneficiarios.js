@@ -99,6 +99,8 @@ function CarregarBeneficiario(id, cpf, nome) {
     cell1.innerHTML = cpf;
     cell2.innerHTML = nome;
     cell3.innerHTML = "<button onclick=\"CarregarDados(this)\" type=\"button\" class=\"btn btn-sm btn-primary\">Alterar</button> <button onclick=\"DeletarBeneficiario(this)\" type=\"button\" class=\"btn btn-sm btn-primary\">Excluir</button> ";
+
+    cell0.style.display = "none"
 }
 
 function CarregarDados(button) {
