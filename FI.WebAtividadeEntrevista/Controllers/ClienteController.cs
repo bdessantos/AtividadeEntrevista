@@ -8,6 +8,8 @@ using System.Web.Mvc;
 using FI.AtividadeEntrevista.DML;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Drawing;
+using FI.WebAtividadeEntrevista.Models;
 
 namespace WebAtividadeEntrevista.Controllers
 {
@@ -28,7 +30,7 @@ namespace WebAtividadeEntrevista.Controllers
         public JsonResult Incluir(ClienteModel model)
         {
             BoCliente bo = new BoCliente();
-            
+
             if (!this.ModelState.IsValid)
             {
                 List<string> erros = (from item in ModelState.Values
@@ -52,7 +54,7 @@ namespace WebAtividadeEntrevista.Controllers
                     return Json(string.Join(Environment.NewLine, erros));
                 }
 
-                if(bo.VerificarExistencia(model.CPF))
+                if (bo.VerificarExistencia(model.CPF))
                 {
                     var erros = new List<string>() { "O CPF informado já consta no banco de dados" };
 
@@ -62,7 +64,7 @@ namespace WebAtividadeEntrevista.Controllers
                 }
 
                 model.Id = bo.Incluir(new Cliente()
-                {                    
+                {
                     CEP = model.CEP,
                     Cidade = model.Cidade,
                     Email = model.Email,
@@ -75,7 +77,43 @@ namespace WebAtividadeEntrevista.Controllers
                     CPF = model.CPF
                 });
 
-           
+                var boBeneficiario = new BoBeneficiario();
+
+                var errosBeneficiarios = new List<string>();
+
+                foreach (var beneficiario in model.Beneficiarios)
+                {
+                    beneficiario.CPF = RemoverCaracteresEspeciais(beneficiario.CPF);
+
+                    if (!CpfValido(beneficiario.CPF))
+                    {
+                        errosBeneficiarios.Add(string.Format("CPF do beneficiario {0} e invalido", beneficiario.Nome));
+                        continue;
+                    }
+
+                    if (boBeneficiario.VerificarExistencia(beneficiario.CPF))
+                    {
+                        errosBeneficiarios.Add(string.Format("O CPF informado para o beneficiario {0} ja consta no banco de dados", beneficiario.Nome));
+                        continue;
+                    }
+                }
+
+                if (errosBeneficiarios.Count > 0)
+                {
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return Json(string.Join(Environment.NewLine, errosBeneficiarios));
+                }
+
+                foreach (var beneficiario in model.Beneficiarios)
+                {
+                    boBeneficiario.Incluir(new Beneficiario()
+                    {
+                        Nome = beneficiario.Nome,
+                        CPF = beneficiario.CPF
+                    }, model.Id);
+                }
+
                 return Json("Cadastro efetuado com sucesso");
             }
         }
@@ -84,7 +122,7 @@ namespace WebAtividadeEntrevista.Controllers
         public JsonResult Alterar(ClienteModel model)
         {
             BoCliente bo = new BoCliente();
-       
+
             if (!this.ModelState.IsValid)
             {
                 List<string> erros = (from item in ModelState.Values
@@ -130,7 +168,7 @@ namespace WebAtividadeEntrevista.Controllers
                     Telefone = model.Telefone,
                     CPF = model.CPF
                 });
-                               
+
                 return Json("Cadastro alterado com sucesso");
             }
         }
@@ -141,6 +179,9 @@ namespace WebAtividadeEntrevista.Controllers
             BoCliente bo = new BoCliente();
             Cliente cliente = bo.Consultar(id);
             Models.ClienteModel model = null;
+
+            BoBeneficiario boBeneficiario = new BoBeneficiario();
+            var beneficiarios = boBeneficiario.ListarPeloIdCliente(cliente.Id);
 
             if (cliente != null)
             {
@@ -156,7 +197,8 @@ namespace WebAtividadeEntrevista.Controllers
                     Nome = cliente.Nome,
                     Sobrenome = cliente.Sobrenome,
                     Telefone = cliente.Telefone,
-                    CPF = cliente.CPF
+                    CPF = cliente.CPF,
+                    Beneficiarios = beneficiarios.Select(beneficiario => CarregarBeneficiarioModel(beneficiario)).ToList()
                 };
             }
 
@@ -238,5 +280,13 @@ namespace WebAtividadeEntrevista.Controllers
         }
 
         public static string RemoverCaracteresEspeciais(string cpf) => Regex.Replace(cpf, @"[^\d]", "");
+
+        private BeneficiarioModel CarregarBeneficiarioModel(Beneficiario beneficiario) => 
+            new BeneficiarioModel()
+            {
+                CPF = beneficiario.CPF,
+                Nome = beneficiario.Nome,
+                Id = beneficiario.Id,
+            };
     }
 }

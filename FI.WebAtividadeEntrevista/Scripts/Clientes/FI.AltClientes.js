@@ -1,5 +1,6 @@
 ﻿
 $(document).ready(function () {
+
     if (obj) {
         $('#formCadastro #Nome').val(obj.Nome);
         $('#formCadastro #CEP').val(obj.CEP);
@@ -11,6 +12,7 @@ $(document).ready(function () {
         $('#formCadastro #Cidade').val(obj.Cidade);
         $('#formCadastro #Logradouro').val(obj.Logradouro);
         $('#formCadastro #Telefone').val(obj.Telefone);
+        CarregarBeneficiarios(obj.Beneficiarios)
     }
 
     $('#formCadastro').submit(function (e) {

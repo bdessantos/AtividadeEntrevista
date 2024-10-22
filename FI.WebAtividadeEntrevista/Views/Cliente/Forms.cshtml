@@ -94,7 +94,6 @@
 
 </form>
 
-<!-- Modal -->
 <div id="modalBeneficiario" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -103,7 +102,7 @@
                 <h4 class="modal-title">Beneficiários</h4>
             </div>
             <div class="modal-body">
-                <form id="beneficiarioForm">
+                <form id="beneficiarioForm" method="post">
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="CPFBeneficiario">CPF:</label>
@@ -113,11 +112,27 @@
                             <label for="NomeBeneficiario">Nome:</label>
                             <input required="required" type="text" class="form-control" id="NomeBeneficiario" name="NomeBeneficiario" placeholder="Ex.: Maria" maxlength="50">
                         </div>
-                        <div class="col-md-4 col-lg-pull-3">
-                            <button type="submit" class="btn btn-sm btn-success">Incluir</button>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div>
+                                <button type="button" class="btn btn-sm btn-success" onclick="IncluirBeneficiario()">Incluir</button>
+                            </div>
                         </div>
                     </div>
                 </form>
+                 Tabela para listar beneficiários 
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>CPF</th>
+                            <th>Nome</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="beneficiarioTable">
+                        <tr>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
