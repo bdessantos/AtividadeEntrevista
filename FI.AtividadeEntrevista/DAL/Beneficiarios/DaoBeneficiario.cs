@@ -1,7 +1,5 @@
-﻿using FI.AtividadeEntrevista.BLL;
-using FI.AtividadeEntrevista.DML;
+﻿using FI.AtividadeEntrevista.DML;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 
@@ -9,6 +7,17 @@ namespace FI.AtividadeEntrevista.DAL.Beneficiarios
 {
     internal class DaoBeneficiario : AcessoDados
     {
+        internal void Alterar(Beneficiario beneficiario)
+        {
+            List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
+
+            parametros.Add(new System.Data.SqlClient.SqlParameter("Nome", beneficiario.Nome));
+            parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", beneficiario.CPF));
+            parametros.Add(new System.Data.SqlClient.SqlParameter("ID", beneficiario.Id));
+
+            base.Executar("FI_SP_AltBenef", parametros);
+        }
+
         internal long Incluir(Beneficiario beneficiario, long idCliente)
         {
             List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
@@ -59,6 +68,22 @@ namespace FI.AtividadeEntrevista.DAL.Beneficiarios
             DataSet ds = base.Consultar("FI_SP_VerificaBeneficiario", parametros);
 
             return ds.Tables[0].Rows.Count > 0;
+        }
+
+        internal bool VerificarExistenciaParaUmIdDiferente(string CPF, long id)
+        {
+            List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
+
+            parametros.Add(new System.Data.SqlClient.SqlParameter("CPF", CPF));
+
+            DataSet ds = base.Consultar("FI_SP_ConsBeneficiarioPeloCpf", parametros);
+
+            if (ds == null || ds.Tables == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
+                return false;
+
+            var row = ds.Tables[0].Rows[0];
+
+            return row.Field<long>("Id") != id;
         }
     }
 }

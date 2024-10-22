@@ -10,6 +10,9 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Drawing;
 using FI.WebAtividadeEntrevista.Models;
+using System.Reflection;
+using System.Web.UI.WebControls;
+using FI.WebAtividadeEntrevista.Exceptions;
 
 namespace WebAtividadeEntrevista.Controllers
 {
@@ -77,46 +80,30 @@ namespace WebAtividadeEntrevista.Controllers
                     CPF = model.CPF
                 });
 
-                var boBeneficiario = new BoBeneficiario();
-
-                var errosBeneficiarios = new List<string>();
-
-                foreach (var beneficiario in model.Beneficiarios)
+                try
                 {
-                    beneficiario.CPF = RemoverCaracteresEspeciais(beneficiario.CPF);
-
-                    if (!CpfValido(beneficiario.CPF))
-                    {
-                        errosBeneficiarios.Add(string.Format("CPF do beneficiario {0} e invalido", beneficiario.Nome));
-                        continue;
-                    }
-
-                    if (boBeneficiario.VerificarExistencia(beneficiario.CPF))
-                    {
-                        errosBeneficiarios.Add(string.Format("O CPF informado para o beneficiario {0} ja consta no banco de dados", beneficiario.Nome));
-                        continue;
-                    }
+                    IncluirBeneficiarios(model.Beneficiarios, model.Id);
                 }
+                catch (BadRequestException ex)
+                {
+                    var errosBeneficiario = ex.Message.Split(';');
 
-                if (errosBeneficiarios.Count > 0)
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return Json(string.Join(Environment.NewLine, errosBeneficiario));
+                }
+                catch (Exception ex)
                 {
                     Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
-                    return Json(string.Join(Environment.NewLine, errosBeneficiarios));
-                }
-
-                foreach (var beneficiario in model.Beneficiarios)
-                {
-                    boBeneficiario.Incluir(new Beneficiario()
-                    {
-                        Nome = beneficiario.Nome,
-                        CPF = beneficiario.CPF
-                    }, model.Id);
+                    return Json(string.Join(Environment.NewLine, new List<string>(0) { ex.Message }));
                 }
 
                 return Json("Cadastro efetuado com sucesso");
             }
         }
+
+
 
         [HttpPost]
         public JsonResult Alterar(ClienteModel model)
@@ -168,6 +155,25 @@ namespace WebAtividadeEntrevista.Controllers
                     Telefone = model.Telefone,
                     CPF = model.CPF
                 });
+
+                try
+                {
+                    IncluirBeneficiarios(model.Beneficiarios, model.Id);
+                }
+                catch (BadRequestException ex)
+                {
+                    var errosBeneficiario = ex.Message.Split(';');
+
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return Json(string.Join(Environment.NewLine, errosBeneficiario));
+                }
+                catch (Exception ex)
+                {
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    return Json(string.Join(Environment.NewLine, new List<string>(0) { ex.Message }));
+                }
 
                 return Json("Cadastro alterado com sucesso");
             }
@@ -281,12 +287,71 @@ namespace WebAtividadeEntrevista.Controllers
 
         public static string RemoverCaracteresEspeciais(string cpf) => Regex.Replace(cpf, @"[^\d]", "");
 
-        private BeneficiarioModel CarregarBeneficiarioModel(Beneficiario beneficiario) => 
+        private BeneficiarioModel CarregarBeneficiarioModel(Beneficiario beneficiario) =>
             new BeneficiarioModel()
             {
                 CPF = beneficiario.CPF,
                 Nome = beneficiario.Nome,
                 Id = beneficiario.Id,
             };
+
+        private void IncluirBeneficiarios(List<BeneficiarioModel> beneficiarios, long idCliente)
+        {
+            var boBeneficiario = new BoBeneficiario();
+
+            var errosBeneficiarios = new List<string>();
+
+            foreach (var beneficiario in beneficiarios)
+            {
+                beneficiario.CPF = RemoverCaracteresEspeciais(beneficiario.CPF);
+
+                if (!CpfValido(beneficiario.CPF))
+                {
+                    errosBeneficiarios.Add(string.Format("CPF do beneficiario {0} e invalido", beneficiario.Nome));
+                    continue;
+                }
+
+                if(beneficiario.Id < 1)
+                {
+                    if (boBeneficiario.VerificarExistencia(beneficiario.CPF))
+                    {
+                        errosBeneficiarios.Add(string.Format("O CPF informado para o beneficiario {0} ja consta no banco de dados", beneficiario.Nome));
+                        continue;
+                    }
+                }
+                else
+                {
+                    if (boBeneficiario.VerificarExistenciaParaUmIdDiferente(beneficiario.CPF, beneficiario.Id))
+                    {
+                        errosBeneficiarios.Add(string.Format("O CPF informado para o beneficiario {0} ja consta no banco de dados", beneficiario.Nome));
+                        continue;
+                    }
+                }
+            }
+
+            if (errosBeneficiarios.Count > 0)
+                throw new BadRequestException(string.Join(";", errosBeneficiarios));
+
+            foreach (var beneficiario in beneficiarios)
+            {
+                if(beneficiario.Id < 1)
+                {
+                    boBeneficiario.Incluir(new Beneficiario()
+                    {
+                        Nome = beneficiario.Nome,
+                        CPF = beneficiario.CPF
+                    }, idCliente);
+                }
+                else
+                {
+                    boBeneficiario.Alterar(new Beneficiario()
+                    {
+                        Id = beneficiario.Id,
+                        Nome = beneficiario.Nome,
+                        CPF = beneficiario.CPF
+                    });
+                }
+            }
+        }
     }
 }

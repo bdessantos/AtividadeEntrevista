@@ -7,6 +7,12 @@ namespace FI.AtividadeEntrevista.BLL
 {
     public class BoBeneficiario
     {
+        public void Alterar(Beneficiario beneficiario)
+        {
+            DaoBeneficiario ben = new DaoBeneficiario();
+            ben.Alterar(beneficiario);
+        }
+
         public long Incluir(Beneficiario beneficiario, long idCliente)
         {
             DaoBeneficiario ben = new DaoBeneficiario();
@@ -23,6 +29,12 @@ namespace FI.AtividadeEntrevista.BLL
         {
             DaoBeneficiario ben = new DaoBeneficiario();
             return ben.VerificarExistencia(CPF);
+        }
+
+        public bool VerificarExistenciaParaUmIdDiferente(string CPF, long id)
+        {
+            DaoBeneficiario ben = new DaoBeneficiario();
+            return ben.VerificarExistenciaParaUmIdDiferente(CPF, id);
         }
     }
 }
