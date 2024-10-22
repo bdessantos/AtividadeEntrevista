@@ -48,7 +48,10 @@ function IncluirBeneficiario() {
 function CarregarBeneficiarios(beneficiariosCarregar) {
 
     for (var i = 0; i < beneficiariosCarregar.length; i++) {
-        
+
+        if (beneficiariosCarregar[i].Deletar)
+            continue;
+
         CarregarBeneficiario(beneficiariosCarregar[i].Id, beneficiariosCarregar[i].CPF, beneficiariosCarregar[i].Nome)
     }
 }
@@ -67,7 +70,7 @@ function CarregarBeneficiario(id, cpf, nome) {
     cell0.innerHTML = id
     cell1.innerHTML = cpf;
     cell2.innerHTML = nome;
-    cell3.innerHTML = "<button onclick=\"CarregarDados(this)\" type=\"button\" class=\"btn btn-sm btn-primary\">Alterar</button> <button type=\"button\" class=\"btn btn-sm btn-primary\">Excluir</button> ";
+    cell3.innerHTML = "<button onclick=\"CarregarDados(this)\" type=\"button\" class=\"btn btn-sm btn-primary\">Alterar</button> <button onclick=\"DeletarBeneficiario(this)\" type=\"button\" class=\"btn btn-sm btn-primary\">Excluir</button> ";
 }
 
 function CarregarDados(button) {
@@ -81,33 +84,28 @@ function CarregarDados(button) {
     document.getElementById('IdBeneficiario').value = id
     document.getElementById('CPFBeneficiario').value = cpf
     document.getElementById('NomeBeneficiario').value = nome
+}
 
+function DeletarBeneficiario(button) {
 
-    //if (!cpf) {
-    //    ModalDialog('Beneficiarios', 'O campo CPF do beneficiario e obrigatorio')
-    //    return
-    //}
+    var row = button.parentNode.parentNode;
 
-    //if (!nome) {
-    //    ModalDialog('Beneficiarios', 'O campo nome do beneficiario e obrigatorio')
-    //    return
-    //}
+    var id = row.cells[0].innerHTML || '';
 
-    //const index = beneficiarios.findIndex(item => item.id === 2);
+    const index = beneficiarios.findIndex(item => item.Id == id);
+    const beneficiario = beneficiarios.find(item => item.Id == id);
 
-    //beneficiarios.splice(index, 1);
+    beneficiario.Deletar = true
 
-    //var beneficiario = {
-    //    "Id": id,
-    //    "Nome": nome,
-    //    "CPF": cpf
-    //}
+    beneficiarios.splice(index, 1);
 
-    //beneficiarios.push(beneficiario)
+    beneficiarios.push(beneficiario)
 
-    //table.innerHTML = ''
+    var table = document.getElementById("beneficiarioTable");
 
-    //CarregarBeneficiarios(beneficiarios)
+    table.innerHTML = ''
+
+    CarregarBeneficiarios(beneficiarios)
 }
 
 $(document).ready(function () {

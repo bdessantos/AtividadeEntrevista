@@ -18,6 +18,15 @@ namespace FI.AtividadeEntrevista.DAL.Beneficiarios
             base.Executar("FI_SP_AltBenef", parametros);
         }
 
+        internal void Excluir(long id)
+        {
+            List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
+
+            parametros.Add(new System.Data.SqlClient.SqlParameter("Id", id));
+
+            base.Executar("FI_SP_DelBeneficiario", parametros);
+        }
+
         internal long Incluir(Beneficiario beneficiario, long idCliente)
         {
             List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();

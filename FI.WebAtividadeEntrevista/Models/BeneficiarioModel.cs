@@ -16,5 +16,10 @@ namespace FI.WebAtividadeEntrevista.Models
         /// CPF
         /// </summary>
         public string CPF { get; set; }
+
+        /// <summary>
+        /// Deletar
+        /// </summary>
+        public bool Deletar { get; set; } = false;
     }
 }

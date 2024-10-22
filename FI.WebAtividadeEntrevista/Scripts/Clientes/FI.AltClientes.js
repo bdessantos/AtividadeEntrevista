@@ -12,7 +12,10 @@ $(document).ready(function () {
         $('#formCadastro #Cidade').val(obj.Cidade);
         $('#formCadastro #Logradouro').val(obj.Logradouro);
         $('#formCadastro #Telefone').val(obj.Telefone);
+
         CarregarBeneficiarios(obj.Beneficiarios)
+
+        beneficiarios = obj.Beneficiarios
     }
 
     $('#formCadastro').submit(function (e) {

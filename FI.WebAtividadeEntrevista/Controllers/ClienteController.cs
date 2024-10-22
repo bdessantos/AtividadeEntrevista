@@ -334,6 +334,13 @@ namespace WebAtividadeEntrevista.Controllers
 
             foreach (var beneficiario in beneficiarios)
             {
+                if (beneficiario.Deletar)
+                {
+                    boBeneficiario.Excluir(beneficiario.Id);
+
+                    continue;
+                }
+
                 if(beneficiario.Id < 1)
                 {
                     boBeneficiario.Incluir(new Beneficiario()

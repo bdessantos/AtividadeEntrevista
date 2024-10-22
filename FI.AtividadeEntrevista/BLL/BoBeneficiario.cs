@@ -13,6 +13,12 @@ namespace FI.AtividadeEntrevista.BLL
             ben.Alterar(beneficiario);
         }
 
+        public void Excluir(long id)
+        {
+            DaoBeneficiario ben = new DaoBeneficiario();
+            ben.Excluir(id);
+        }
+
         public long Incluir(Beneficiario beneficiario, long idCliente)
         {
             DaoBeneficiario ben = new DaoBeneficiario();
