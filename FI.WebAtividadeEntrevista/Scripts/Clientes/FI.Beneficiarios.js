@@ -22,7 +22,7 @@ function IncluirBeneficiario() {
 
     const beneficiarioPesquisar = beneficiarios.find(item => item.CPF == cpf) || null;
 
-    if (beneficiarioPesquisar) {
+    if (beneficiarioPesquisar && (beneficiario.Id != beneficiarioPesquisar.Id || beneficiario.Id == 0)) {
         ModalDialog("Beneficiario", "Ja existe um beneficiario com o CPF informado para este cliente")
         return
     }
